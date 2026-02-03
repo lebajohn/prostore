@@ -1,5 +1,5 @@
-
-import { prisma } from "../lib/prisma.js"; // relative path from db/ to lib/prisma.ts
+import "dotenv/config";
+import { prisma } from "@/db/prisma"; // relative path from db/ to lib/prisma.ts
 import sampleData from "./sample-data";
 
 async function main() {
@@ -14,4 +14,4 @@ async function main() {
   console.log("✅ Database seeded successfully!");
 }
 
-main()
+main();
