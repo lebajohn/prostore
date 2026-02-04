@@ -1,11 +1,27 @@
+import { hashSync } from 'bcrypt-ts-edge';
+
 const sampleData = {
+  users: [
+    {
+      name: 'John',
+      email: 'admin@example.com',
+      password: hashSync('123456', 10),
+      role: 'user'
+    },
+     {
+      name: 'Jane',
+      email: 'user@example.com',
+      password: hashSync('123456', 10),
+      role: 'admin'
+    }
+  ],
   products: [
     {
       name: 'Polo Sporting Stretch Shirt',
       slug: 'polo-sporting-stretch-shirt',
       category: "Men's Dress Shirts",
       description: 'Classic Polo style with modern comfort',
-      images: [
+      image: [
         '/images/sample-products/p1-1.jpg',
         '/images/sample-products/p1-2.jpg',
       ],
@@ -22,7 +38,7 @@ const sampleData = {
       slug: 'brooks-brothers-long-sleeved-shirt',
       category: "Men's Dress Shirts",
       description: 'Timeless style and premium comfort',
-      images: [
+      image: [
         '/images/sample-products/p2-1.jpg',
         '/images/sample-products/p2-2.jpg',
       ],
@@ -39,7 +55,7 @@ const sampleData = {
       slug: 'tommy-hilfiger-classic-fit-dress-shirt',
       category: "Men's Dress Shirts",
       description: 'A perfect blend of sophistication and comfort',
-      images: [
+      image: [
         '/images/sample-products/p3-1.jpg',
         '/images/sample-products/p3-2.jpg',
       ],
@@ -56,7 +72,7 @@ const sampleData = {
       slug: 'calvin-klein-slim-fit-stretch-shirt',
       category: "Men's Dress Shirts",
       description: 'Streamlined design with flexible stretch fabric',
-      images: [
+      image: [
         '/images/sample-products/p4-1.jpg',
         '/images/sample-products/p4-2.jpg',
       ],
@@ -73,7 +89,7 @@ const sampleData = {
       slug: 'polo-ralph-lauren-oxford-shirt',
       category: "Men's Dress Shirts",
       description: 'Iconic Polo design with refined oxford fabric',
-      images: [
+      image: [
         '/images/sample-products/p5-1.jpg',
         '/images/sample-products/p5-2.jpg',
       ],
@@ -90,7 +106,7 @@ const sampleData = {
       slug: 'polo-classic-pink-hoodie',
       category: "Men's Sweatshirts",
       description: 'Soft, stylish, and perfect for laid-back days',
-      images: [
+      image: [
         '/images/sample-products/p6-1.jpg',
         '/images/sample-products/p6-2.jpg',
       ],

@@ -9,8 +9,6 @@ import ws from 'ws';
 neonConfig.webSocketConstructor = ws;
 const connectionString = process.env.DATABASE_URL!;
 
-// Creates a new connection pool using the provided connection string, allowing multiple concurrent connections.
-// const pool = new Pool({ connectionString });
 
 const adapter = new PrismaNeon({connectionString});
 
