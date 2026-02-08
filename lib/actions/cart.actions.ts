@@ -183,7 +183,7 @@ export async function removeItemFromCart(productId: string) {
         revalidatePath(`/product/${product.slug}`);
 
         return {
-            succes: true,
+            success: true,
             message: `${product.name} was removed from cart`
         }
 

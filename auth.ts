@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers'; 
 
 export const config = {
     pages: {
@@ -55,7 +56,7 @@ callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, user, trigger, token }: any) {
         // set the user id from the token
-        session.user.id = token.sub;
+        session.user.id = token.id;
         session.user.role = token.role;
         session.user.name = token.name;
 
@@ -67,9 +68,10 @@ callbacks: {
        return session;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user, }: any) {
+    async jwt({ token, user, trigger }: any) {
         // assign user fields to the token
         if (user) {
+            token.id = user.id;
             token.role = user.role;
 
             // if user has no name use first part of email
@@ -80,13 +82,55 @@ callbacks: {
                 await prisma.user.update({
                     where: {id: user.id },
                     data: {name: token.name}
-                })
+                });
+            }
+
+            if(trigger === 'signIn' || trigger === 'signUp') {
+                const cookiesObject = await cookies();
+                const sessionCartId = cookiesObject.get('sessionCartId')?.value;
+
+                if(sessionCartId) {
+                    const sessionCart = await prisma.cart.findFirst({
+                        where: { sessionCartId },
+                    });
+
+                    if (sessionCart) {
+                        // delete current user cart
+                        await prisma.cart.deleteMany({
+                            where: { userId: user.id},
+                        });
+
+                        // assign new cart
+                        await prisma.cart.update({
+                            where: {id: sessionCart.id},
+                            data: { userId: user.id },
+                        })
+                    }
+                }
             }
         }
         return token;
     },
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     authorized({ request, auth }: any) {
+        // array of regex patterns of paths we want to protect
+        const protectedPaths = [
+           /\/shipping-address/,
+            /\/payment-method/,
+             /\/place-order/,
+              /\/profile/,
+               /\/user\/(.*)/,
+               /\/order\/(.*)/,
+                /\/admin/,
+        ];
+
+        // get pathname from req URL object
+        const { pathname } = request.nextUrl;
+
+        // check if user not authenticated and accessing a protected path
+        if(!auth && protectedPaths.some((p) => p.test(pathname))) return false;
+        
         // check for session cart cookie
         if (!request.cookies.get('sessionCartId')) {
             // generate new session cart id cookie
