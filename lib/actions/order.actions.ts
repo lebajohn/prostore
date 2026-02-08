@@ -8,7 +8,6 @@ import { getUserById } from "./user.actions";
 import { insertOrderSchema } from "../validators";
 import { prisma } from "@/db/prisma";
 import { CartItem } from "@/types";
-import { Prisma } from "@prisma/client";
 
 // create order and create the order items
 
@@ -51,13 +50,13 @@ export async function createOrder() {
             // create order
            const insertedOrder =  await tx.order.create({ 
             data: {
-                userId: order.userId,
-                shippingAddress: order.shippingAddress,
-                paymentMethod: order.paymentMethod,
-                itemsPrice: new Prisma.Decimal(order.itemsPrice),
-                shippingPrice: new Prisma.Decimal(order.shippingPrice),
-                taxPrice: new Prisma.Decimal(order.taxPrice),
-                totalPrice: new Prisma.Decimal(order.totalPrice),
+                 userId: order.userId,
+                 itemsPrice: order.itemsPrice,
+                 shippingPrice: order.shippingPrice,
+                 taxPrice: order.taxPrice,
+                 totalPrice: order.totalPrice,
+                 paymentMethod: order.paymentMethod,
+                 shippingAddress: order.shippingAddress,
             },
         });
            // create order item from the cart items
