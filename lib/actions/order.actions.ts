@@ -8,6 +8,9 @@ import { getUserById } from "./user.actions";
 import { insertOrderSchema } from "../validators";
 import { prisma } from "@/db/prisma";
 import { CartItem } from "@/types";
+import { PAGE_SIZE } from "../constants";
+import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 // create order and create the order items
 
@@ -113,3 +116,163 @@ export async function getOrderById(orderId: string) {
 
     return convertToPlainObject(data);
 }
+
+
+//get user's orders
+export async function getMyOrders({
+    limit = PAGE_SIZE,
+    page,
+}: {
+    limit?: number;
+    page: number;
+}) {
+    const session = await auth();
+    if(!session) throw new Error('User is not authorized');
+
+    const data = await prisma.order.findMany({
+        where: { userId: session?.user?.id},
+        orderBy: {createdAt: 'desc'},
+        take: limit,
+        skip: (page-1) * limit
+    });
+
+    const dataCount = await prisma.order.count({
+        where: { userId: session?.user?.id}
+    });
+
+    return {
+        data,
+        totalPages: Math.ceil(dataCount / limit),
+    };
+}
+
+type SalesDataType = {
+    month: string;
+    totalSales: number;
+}[];
+
+// get sells data and order summary
+export async function getOrderSummary() {
+    // get counts for each resource
+    const ordersCount = await prisma.order.count();
+    const productsCount = await prisma.product.count();
+    const usersCount = await prisma.user.count();
+
+    // calculate the total sales
+    const totalSales = await prisma.order.aggregate({
+        _sum: { totalPrice: true}
+    });
+
+    // get monthly sales
+    const salesDataRaw = await prisma.$queryRaw<Array<{ month: string; totalSales: Prisma.Decimal}
+    >>`SELECT to_char("createdAt", 'MM/YY') as "month", sum("totalPrice") as "totalSales" FROM 
+    "Order" GROUP BY to_char("createdAt", 'MM/YY')`;
+
+    const salesData:SalesDataType = salesDataRaw.map((entry) => ({
+        month: entry.month,
+        totalSales: Number(entry.totalSales)
+    }))
+
+    // get latest orders
+    const latestSales = await prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { 
+            user: { select: { name: true } }
+        },
+        take: 6,
+    });
+
+    return {
+        ordersCount,
+        productsCount,
+        usersCount,
+        totalSales,
+        latestSales,
+        salesData,
+    };
+}
+
+// get all orders
+export async function getAllOrders({
+    limit = PAGE_SIZE,
+    page
+}: {
+    limit?: number;
+    page: number;
+}) {
+    const data = await prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: (page -1) * limit,
+        include: { user: { select: { name: true } }},
+    });
+
+    const dataCount = await prisma.order.count();
+
+    return {
+        data,
+        totalPages: Math.ceil(dataCount / limit),
+    };
+}
+
+ // delete an order
+ export async function deleteOrder(id: string) {
+    try {
+        await prisma.order.delete({ where: { id }});
+        
+        revalidatePath('/admin/orders')
+
+        return {
+            success: true,
+            message: 'Order deleted successfully'
+        }
+    } catch (error) {
+        return {success:false, message: formatError(error)}
+        
+    }
+ }
+
+ // update cod order to paid 
+ export async function updateOrderToPaidCOD(orderId: string) {
+    try {
+        await updateOrderToPaid({ orderId });
+
+        revalidatePath(`/order/${orderId}`);
+
+        return {success: true, message: 'Order marked as paid'}
+    } catch (error) {
+        return {success: false, message: formatError(error)}
+        
+    }
+ }
+
+ // update cod order to delivered
+ export async function deliverOrder(orderId: string) {
+    try {
+       const order = await prisma.order.findFirst({
+        where: {
+            id: orderId,
+        },
+       });
+
+       if(!order) throw new Error('Order not found');
+       if(!order.isPaid) throw new Error('Order is not paid');
+
+       await prisma.order.update({
+        where: { id: orderId},
+        data: {
+            isDelivered: true,
+            deliveredAt: new Date(),
+        },
+       });
+
+       revalidatePath(`/order/${orderId}`);
+
+       return {
+        success: true,
+        message: 'Order has been marked delivered',
+       }
+    } catch (error) {
+        return {success: false, message: formatError(error)}
+    }
+ }

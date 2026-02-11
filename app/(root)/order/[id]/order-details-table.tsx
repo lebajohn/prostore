@@ -3,12 +3,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDateTime, formatId } from "@/lib/utils";
 import { Order } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
+import { useTransition } from "react";
+import { updateOrderToPaidCOD, deliverOrder } from "@/lib/actions/order.actions";
 
-const OrderDetailsTable = ({ order }: { order: Order }) => {
+const OrderDetailsTable = ({ order, isAdmin }: 
+    { order: Order; isAdmin: boolean }) => {
    const {
     id,
     shippingAddress,
@@ -23,6 +28,41 @@ const OrderDetailsTable = ({ order }: { order: Order }) => {
     paidAt,
     deliveredAt
    } = order;
+
+   // Button to mark order as paid
+   const MarkAsPaidButton = () => {
+    const [isPending, startTransition] = useTransition();
+
+    return(
+        <Button
+        type='button'
+        disabled={isPending}
+        onClick={() => startTransition(async () => {
+            const res = await updateOrderToPaidCOD(order.id);
+            toast.success(res.message)
+        })}
+        >
+            {isPending ? 'processing...' : 'Mark As Paid'}
+        </Button>
+    )
+   };
+    // Button to mark order as delivered
+   const MarkAsDeliveredButton = () => {
+    const [isPending, startTransition] = useTransition();
+
+    return(
+        <Button
+        type='button'
+        disabled={isPending}
+        onClick={() => startTransition(async () => {
+            const res = await deliverOrder(order.id);
+            toast.success(res.message)
+        })}
+        >
+            {isPending ? 'processing...' : 'Mark As delivered'}
+        </Button>
+    )
+   };
     return (
     <>
       <h1 className="py-4 text-2xl">Order {formatId(id)}</h1>
@@ -52,7 +92,7 @@ const OrderDetailsTable = ({ order }: { order: Order }) => {
                     </p>
                     {isDelivered ? (
                         <Badge variant='secondary'>
-                            Paid at { formatDateTime(deliveredAt!).dateTime}
+                            Delivered at { formatDateTime(deliveredAt!).dateTime}
                         </Badge>
                     ) : (
                         <Badge variant='destructive'>
@@ -120,6 +160,12 @@ const OrderDetailsTable = ({ order }: { order: Order }) => {
                         <div>Total</div>
                         <div>{ formatCurrency(totalPrice) }</div>
                     </div>
+
+                    {/* {cash on delivery} */}
+                    {isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (
+                            <MarkAsPaidButton />
+                        )}
+                    { isAdmin && isPaid && !isDelivered && <MarkAsDeliveredButton /> }
                 </CardContent>
             </Card>
         </div>
