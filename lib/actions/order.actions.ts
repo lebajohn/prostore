@@ -1,6 +1,7 @@
 'use server';
 
-import { isRedirectError } from 'next/dist/client/components/redirect';
+// import { getRedirectError } from 'next/dist/client/components/redirect';
+import { redirect } from 'next/navigation';
 import { convertToPlainObject, formatError } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
@@ -11,7 +12,7 @@ import { CartItem, PaymentResult, ShippingAddress } from '@/types';
 import { paypal } from '../paypal';
 import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/src/generated/prisma';
 import { sendPurchaseReceipt } from '@/email';
 
 // Create order and create the order items
@@ -97,10 +98,17 @@ export async function createOrder() {
       message: 'Order created',
       redirectTo: `/order/${insertedOrderId}`,
     };
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    return { success: false, message: formatError(error) };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+  //   if (getRedirectError(error)) throw error;
+  //   return { success: false, message: formatError(error) };
+  // }
+  if (err?.message?.includes('Redirect')) {
+    redirect('/some-path'); // handle redirect
+  } else {
+    throw err;
   }
+}
 }
 
 // Get order by id
