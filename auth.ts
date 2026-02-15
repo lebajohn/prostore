@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
+// import { authConfig } from './auth.config';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/db/prisma';
 import { cookies } from 'next/headers';
@@ -55,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    ...authConfig.callbacks,
+    // ...authConfig.callbacks,
     async session({ session, user, trigger }) {
 
       const updateName = trigger === 'update' ? user.name: session.user.name
@@ -73,12 +73,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // If there is an update, set the user name
-      if (trigger === 'update') {
-        session.user.name = user.name;
-      }
+      // // If there is an update, set the user name
+      // if (trigger === 'update') {
+      //   session.user.name = user.name;
+      // }
 
-      return session;
+      // return session;
     },
     async jwt({ token, user, trigger, session }) {
       // Assign user fields to token
