@@ -12,12 +12,24 @@ const Homepage = async () => {
   const latestProducts = await getLatestProducts();
   const featuredProducts = await getFeaturedProducts();
 
+  const mappedFeaturedProducts = featuredProducts.map(p => ({
+  ...p,
+  images: p.image ?? [], // rename dynamically
+}));
+
+const mappedLatestProducts = latestProducts.map(p => ({
+  ...p,
+  images: p.image ?? [], // rename dynamically
+}));
+
+
+
   return (
     <>
       {featuredProducts.length > 0 && (
-        <ProductCarousel data={featuredProducts} />
+        <ProductCarousel data={mappedFeaturedProducts} />
       )}
-      <ProductList data={latestProducts} title='Newest Arrivals' limit={4} />
+      <ProductList data={mappedLatestProducts} title='Newest Arrivals' limit={4} />
       <ViewAllProductsButton />
       <DealCountdown />
       <IconBoxes />
