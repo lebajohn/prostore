@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/db/prisma';
 import { cookies } from 'next/headers';
 import { compare } from './lib/encrypt';
@@ -56,11 +56,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async session({ session, user, trigger, token }) {
-      // Set the user ID from the token
-      session.user.id = token.sub;
-      session.user.role = token.role;
-      session.user.name = token.name;
+    async session({ session, user, trigger }) {
+
+      const updateName = trigger === 'update' ? user.name: session.user.name
+      // // Set the user ID from the token
+      // session.user.id = token.sub;
+      // session.user.role = token.role;
+      // session.user.name = token.name;
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          role: user.role,
+          name: updateName,
+        }
+      }
 
       // If there is an update, set the user name
       if (trigger === 'update') {
