@@ -8,7 +8,7 @@ type PaginationProps = {
     page: number | string;
     totalPages: number;
     urlParamName?: string;
-}
+};
 
 const Pagination = ({ page, totalPages, urlParamName}: PaginationProps) => {
     const router = useRouter();
@@ -42,7 +42,8 @@ const Pagination = ({ page, totalPages, urlParamName}: PaginationProps) => {
         >
             Next
         </Button>
-    </div> );
+    </div> 
+    );
 }
  
 export default Pagination;

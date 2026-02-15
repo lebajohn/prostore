@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
 
-const ProductPrice = ({ value, className }: { value: number; className?: string; }) => {
+const ProductPrice = ({ 
+    value, 
+    className 
+}: { 
+    value: number; 
+    className?: string; 
+}) => {
 
     // ensure 2 decimal values
     const stringValue = value.toFixed(2);

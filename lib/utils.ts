@@ -1,64 +1,65 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import qs from 'query-string';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-
-// convert prisma object into a regular JS object
-export function convertToPlainObject<T>(value: T): T{
+// Convert prisma object into a regular JS object
+export function convertToPlainObject<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
 // Format number with decimal places
 export function formatNumberWithDecimal(num: number): string {
- const [int, decimal] = num.toString().split(".");
- return decimal ? `${int}.${decimal.padEnd(2, "0")}` : `${int}.00`;
+  const [int, decimal] = num.toString().split('.');
+  return decimal ? `${int}.${decimal.padEnd(2, '0')}` : `${int}.00`;
 }
 
-// format errors
+// Format errors
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatError(error: any) {
   if (error.name === 'ZodError') {
-    //handle Zod error
+    // Handle Zod error
     const fieldErrors = Object.keys(error.errors).map(
-      (field) => error.errors[field].message);
+      (field) => error.errors[field].message
+    );
 
-    return fieldErrors.join('. ')
-  } else if (error.name == 'PrismaClientKnownRequestError' && 
-    error.code === 'P2002') {
-    // handle Prisma error
+    return fieldErrors.join('. ');
+  } else if (
+    error.name === 'PrismaClientKnownRequestError' &&
+    error.code === 'P2002'
+  ) {
+    // Handle Prisma error
     const field = error.meta?.target ? error.meta.target[0] : 'Field';
-
     return `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
   } else {
-    //handle other errors
-    return typeof error.message === 'string' 
-    ? error.message 
-    : JSON.stringify(error.message);
+    // Handle other errors
+    return typeof error.message === 'string'
+      ? error.message
+      : JSON.stringify(error.message);
   }
 }
 
-// round number to 2 decimal places
+// Round number to 2 decimal places
 export function round2(value: number | string) {
   if (typeof value === 'number') {
-     return Math.round((value + Number.EPSILON) * 100) / 100;
-  }else if (typeof value === 'string') {
-     return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
-  }else {
-    throw new Error('Value is not a number or string')
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  } else if (typeof value === 'string') {
+    return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+  } else {
+    throw new Error('Value is not a number or string');
   }
 }
 
-const CURRENCY_FORMATTER = new Intl.NumberFormat('en-Us', {
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   style: 'currency',
-  minimumFractionDigits: 2
+  minimumFractionDigits: 2,
 });
 
-//format currency using the formatter above
+// Format currency using the formatter above
 export function formatCurrency(amount: number | string | null) {
   if (typeof amount === 'number') {
     return CURRENCY_FORMATTER.format(amount);
@@ -69,7 +70,7 @@ export function formatCurrency(amount: number | string | null) {
   }
 }
 
-// format Number
+// Format Number
 const NUMBER_FORMATTER = new Intl.NumberFormat('en-US');
 
 export function formatNumber(number: number) {
@@ -81,7 +82,7 @@ export function formatId(id: string) {
   return `..${id.substring(id.length - 6)}`;
 }
 
-// format date and time
+// Format date and times
 export const formatDateTime = (dateString: Date) => {
   const dateTimeOptions: Intl.DateTimeFormatOptions = {
     month: 'short', // abbreviated month name (e.g., 'Oct')
@@ -121,7 +122,7 @@ export const formatDateTime = (dateString: Date) => {
   };
 };
 
-// form the pagination links
+// Form the pagination links
 export function formUrlQuery({
   params,
   key,
@@ -131,18 +132,17 @@ export function formUrlQuery({
   key: string;
   value: string | null;
 }) {
-
   const query = qs.parse(params);
 
   query[key] = value;
 
   return qs.stringifyUrl(
-      {
-        url: window.location.pathname,
-        query,
-      },
-      {
-        skipNull: true,
-      }
-    );
+    {
+      url: window.location.pathname,
+      query,
+    },
+    {
+      skipNull: true,
+    }
+  );
 }

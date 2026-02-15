@@ -43,7 +43,7 @@ const PaymentMethodForm = ({
             })
         };
 
-   return <>
+   return (<>
       <div className="max-w-md mx-auto space-y-4">
         <h1 className="h2-bold mt-4">Payment Method</h1>
         <p className="text-sm text-muted-foreground">
@@ -94,7 +94,8 @@ const PaymentMethodForm = ({
             </form>
         </Form>
       </div>
-    </>;
+    </>
+   );
 };
 
  
