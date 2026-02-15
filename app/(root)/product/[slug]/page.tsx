@@ -80,7 +80,7 @@ const ProductDetailsPage = async (props: {
                                     slug: product.slug,
                                     price: product.price,
                                     qty: 1,
-                                    image: product.images![0]
+                                    image: product.image![0]
                                 }} />
                             </div>
                         )}
