@@ -1,9 +1,17 @@
 const encoder = new TextEncoder();
-const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY); // Retrieve key from env var
+const getKey = () => {
+  const secret = process.env.ENCRYPTION_KEY;
+  if (!secret) {
+    throw new Error("ENCRYPTION_KEY is not defined");
+  }
+  return new TextEncoder().encode(secret);
+};
+// const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY); // Retrieve key from env var
 
 // Hash function with key-based encryption
 export const hash = async (plainPassword: string): Promise<string> => {
   const passwordData = encoder.encode(plainPassword);
+  const key = getKey();
 
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
