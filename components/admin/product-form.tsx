@@ -34,7 +34,7 @@ const ProductForm = ({ type, product, productId }: {
     defaultValues: type === 'Update' ? product : productDefaultValues,
   });
 
-    const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (values) => {
+    const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (values: { name: string; slug: string; category: string; brand: string; description: string; stock: number; images: string[]; isFeatured: boolean; banner: string | null; price: string; }) => {
         // on create
         if (type === 'Create') {
             const res = await createProduct(values);

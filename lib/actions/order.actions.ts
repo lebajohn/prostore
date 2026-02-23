@@ -98,7 +98,6 @@ export async function createOrder() {
       message: 'Order created',
       redirectTo: `/order/${insertedOrderId}`,
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
   //   if (getRedirectError(error)) throw error;
   //   return { success: false, message: formatError(error) };
